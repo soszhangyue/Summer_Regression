@@ -1,6 +1,9 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <cmath>
+#include <fstream>
+#include <string>
+#include <regex>
 
 
 using namespace std;
@@ -10,19 +13,29 @@ using namespace Eigen;
 int main()
 {
 
-
+	MatrixXd readVariable_m(string OUTPUT_PATH);
+	VectorXd readVariable_v(string OUTPUT_PATH);
 	//先把p，N弄好，暂时先不做输入输出了
-	int p = 0;
-	int N = 0;
+	int p = 120;//向量维数p
+	int N = 130;//观测向量组数N
+	string input_matrix_path = "C:\\Users\\zhang\\Desktop\\Prime_intern\\data\\120_130_m.txt";
+	string input_vector_path = "C:\\Users\\zhang\\Desktop\\Prime_intern\\data\\120_130_v.txt";
 	//输入P,N
+	/*
 	cout << "请输入向量维数p：";
-	cin >> p;
+	cin   >>p;
 	cout << "\n";
 	cout << "请输入观测向量组数N：";
 	cin >> N;
 	cout << "向量维数p=" << p << "," << "观测向量组数N=" << N << "." << endl;
+	*/
 	//输入数据
 	MatrixXd origin_predictor(N, p);
+	VectorXd response_variable(N);
+	origin_predictor = readVariable_m(input_matrix_path);
+	response_variable = readVariable_v(input_vector_path);
+
+	/*
 	origin_predictor << 1, 1.46935, 1.93765, 0.90668, -1.72568, 1.15898, 2.84707, 1.33223, -2.53562, 2.75447, 1.75682, -3.34376, -0.177932, -1.56464, 1.97797,
 		1, 0.117136, -1.50035, -0.00265979, -0.287058, -0.986279, -0.175744, -0.000311557, -0.0336248, 1.25104, 0.00399061, 0.430687, -0.999993, 0.000763514, -0.917598,
 		1, -2.14577, 1.66381, -0.190788, 1.57, 3.60434, -3.57015, 0.409387, -3.36886, 1.76826, -0.317434, 2.61217, -0.9636, -0.299536, 1.46489,
@@ -37,29 +50,44 @@ int main()
 		1, -0.751, 0.019475, 0.541051, 0.763735, -0.435998, -0.0146257, -0.406329, -0.573565, -0.999621, 0.010537, 0.0148737, -0.707264, 0.413219, -0.416709,
 		1, 0.415669, 0.129012, 0.452036, -0.139574, -0.827219, 0.0536261, 0.187897, -0.0580167, -0.983356, 0.0583179, -0.0180067, -0.795663, -0.0630927, -0.980519,
 		1, -0.0382318, -1.13606, 0.0210645, -0.343026, -0.998538, 0.0434335, -0.000805332, 0.0131145, 0.290625, -0.0239304, 0.389697, -0.999556, -0.00722567, -0.882333,
-		1, 0.228457, -0.0179151, -0.491138, -0.0606083, -0.947808, -0.00409281, -0.112204, -0.0138464, -0.999679, 0.00879877, 0.0010858, -0.758783, 0.0297671, -0.996327;
+		1, 0.228457, -0.0179151, -0.491138, -0.0606083, -0.947808, -0.00409281, -0.112204, -0.0138464, -0.999679, 0.00879877, 0.0010858, -0.758783, 0.0297671, -0.996327,
+		1, 0.15589, -2.06198, 0.123315, -0.184533, -0.975698, -0.321442, 0.0192237, -0.0287669, 3.25174, -0.254273, 0.380502, -0.984793, -0.0227557, -0.965948,
+		1, 1.01072, -0.127675, 0.00611714, -0.669193, 0.0215528, -0.129044, 0.00618271, -0.676367, -0.983699, -0.000781006, 0.0854394, -0.999963, -0.00409355, -0.55218,
+		1, 0.648129, -0.581889, 0.629742, -0.251355, -0.579928, -0.377139, 0.408154, -0.162911, -0.661405, -0.36644, 0.146261, -0.603425, -0.158289, -0.93682,
+		1, 0.495588, -0.419037, -0.579942, -0.567495, -0.754393, -0.207669, -0.287412, -0.281243, -0.824408, 0.243017, 0.237801, -0.663668, 0.329114, -0.67795,
+		1, -0.157312, -0.991246, -0.196317, 0.263919, -0.975253, 0.155935, 0.0308831, -0.0415178, -0.0174305, 0.194598, -0.261609, -0.96146, -0.0518118, -0.930347,
+		1, 0.341234, -0.036256, 0.779673, -0.101865, -0.88356, -0.0123717, 0.266051, -0.0347599, -0.998686, -0.0282678, 0.00369323, -0.39211, -0.0794218, -0.989623,
+		1, 0.19175, -0.192937, -0.469007, -0.0723952, -0.963232, -0.0369955, -0.089932, -0.0138818, -0.962775, 0.0904886, 0.0139677, -0.780032, 0.0339539, -0.994759,
+		1, 0.439497, 0.0595314, 0.435482, 0.165909, -0.806843, 0.0261638, 0.191393, 0.0729165, -0.996456, 0.0259248, 0.0098768, -0.810356, 0.0722504, -0.972474;
 	//cout << origin_predictor << endl;
-	VectorXd response_variable(N);
-	response_variable << -13.803,
-		-14.0973,
-		-13.911,
-		-14.5597,
-		-14.0432,
-		-14.2473,
-		-13.9898,
-		-14.2143,
-		-14.2574,
-		-14.1459,
-		-14.1751,
-		-14.0811,
-		-14.1938,
-		-14.0309,
-		-14.1927;
+
+	response_variable << -4.7379,
+		-10.3279,
+		-5.65421,
+		-6.43774,
+		-7.57781,
+		-7.37809,
+		-4.84481,
+		-7.05903,
+		-7.33078,
+		-8.14725,
+		-7.67051,
+		-7.07962,
+		-7.03677,
+		-9.65007,
+		-8.6445,
+		-11.0973,
+		-7.92086,
+		-7.67651,
+		-9.4632,
+		-9.85731,
+		-6.83096,
+		-8.89963,
+		-7.12564;
 
 	//cout << response_variable << endl;
 
-
-
+	*/
 	//标准化
 	VectorXd mean_vector = VectorXd::Zero(p).transpose();
 	VectorXd mse_vector = VectorXd::Zero(p).transpose();
@@ -141,11 +169,12 @@ int main()
 	int K = 100;//常用值
 	double alpha = 0.5;//alpha值，范围是[0,1]
 	VectorXd beta_vector = VectorXd::Zero(p);//初始化beta向量
-	double beta_temp = 0;//beta的临时值
-	VectorXd residual_vector = response_variable;//启动时残差向量和响应向量的值是相同的
+	double beta_temp = 0;//beta的临时
 	double temp = 0;
 	double wucha = 1;//循环终止的误差
 	double flag = 1e-3;//循环终止的误差限
+	VectorXd p_gradient_vector = VectorXd::Zero(p);//协方差更新中的p梯度向量
+	MatrixXd dot_Matrix = MatrixXd::Zero(p, p);//协方差更新中的内积矩阵
 	clock_t start_time, end_time;
 	//把lambda初始化为lambda_max;
 	double max_dot = 0;
@@ -158,7 +187,11 @@ int main()
 	lambda = max_dot / (N * alpha);
 	cout << "lambda_max=" << lambda << endl;
 	cout << pow(2, 3.3) << endl;
-
+	//初始化p梯度向量
+	for (int i = 1; i <= p; i++) {
+		p_gradient_vector(i-1) = response_variable.dot(origin_predictor.col(i - 1));
+	
+	}
 
 	double S_function(double x, double y);
 	//外边最大的循环：更新lambda
@@ -170,16 +203,32 @@ int main()
 			wucha = 0;
 			for (int i = 1; i <= p; i++) {
 				beta_temp = beta_vector(i - 1);//
-				temp = (residual_vector.dot(origin_predictor.col(i - 1)));
+				temp = p_gradient_vector(i-1);
 				temp = temp / N + beta_temp;//
 				temp = S_function(temp, alpha * lambda) / (1 + lambda * (1 - alpha));//
-				if (temp != beta_temp)
+				if (temp != beta_temp)//是否要进行修改呢？？？
 				{
 					wucha = wucha + (temp - beta_temp) * (temp - beta_temp);
-					for (int j = 1; j <= N; j++) {
-						//cout << j << endl;
-						residual_vector(j - 1) = residual_vector(j - 1) - origin_predictor(j - 1, i - 1) * (temp - beta_temp);//更新残差（这里出过大bug）
+					if (beta_temp != 0) {
+						for (int j = 1; j <=p; j++)
+						{
+							
+								p_gradient_vector(j - 1) = p_gradient_vector(j - 1) - dot_Matrix(j-1,i-1) * (temp - beta_temp);
+							
+
+						}
 					}
+					else {
+						for (int j = 1; j <= p; j++)
+						{
+							dot_Matrix(j - 1, i - 1) = dot_Matrix(i - 1, j - 1) = (origin_predictor.col(i - 1)).dot(origin_predictor.col(j - 1));
+
+							p_gradient_vector(j - 1) = p_gradient_vector(j - 1) - dot_Matrix(j - 1, i - 1) *temp;
+
+
+						}
+					}
+
 					beta_vector(i - 1) = temp;//
 
 				}
@@ -191,7 +240,7 @@ int main()
 		//cout << "第" << k << "轮完成。" << endl;
 	}
 	end_time = clock();
-	cout << "坐标下降法（朴素更新法）结束，花费" << (double)(end_time - start_time) / CLOCKS_PER_SEC << "毫秒" << endl;
+	cout << "坐标下降法（协方差更新法）结束，花费" << (double)(end_time - start_time) / CLOCKS_PER_SEC << "毫秒" << endl;
 	cout << "得到beta向量为：" << endl;
 	cout << beta_vector << endl;
 
@@ -226,4 +275,96 @@ double S_function(double x, double y) {
 	}
 
 
+}
+
+//读取矩阵函数
+MatrixXd readVariable_m(string OUTPUT_PATH) {
+	vector<vector<double>> matrix_temp;//列向量（这里其实还是原来的数组模式）
+	vector<double> row_data_temp;//行向量
+	string line_temp, temp;//
+	int line, col, row, i, j;//
+	smatch result;//
+	ifstream outputfile(OUTPUT_PATH);//以只读的方式打开文件不能改变文件的内容。
+	regex pattern("-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?", regex::icase);//
+	string::const_iterator iterStart;//
+	string::const_iterator iterEnd;//
+	if (!outputfile.is_open())
+	{
+		cout << "未成功打开结果文件:" << OUTPUT_PATH << endl;
+	}
+	line = 0;
+	while (getline(outputfile, line_temp)) {//getline读取一整行
+		if ((line_temp[0] == '!') || (line_temp.length() == 0)) {
+			continue;
+		}
+		else {
+			iterStart = line_temp.begin();
+			iterEnd = line_temp.end();
+			row_data_temp.clear();
+			while (regex_search(iterStart, iterEnd, result, pattern)) {
+				row_data_temp.push_back(atof(string(result[0]).c_str()));
+				iterStart = result[0].second;
+			}
+			matrix_temp.push_back(row_data_temp);
+			line++;
+		}
+	}
+	outputfile.close();   //关闭文件
+	row = matrix_temp.size();//（行数）
+	col = matrix_temp[0].size();//（列数）
+
+	Eigen::MatrixXd matrix(row, col);
+
+	for (i = 0; i < row; i++) {
+		for (j = 0; j < col; j++) {
+			matrix(i, j) = matrix_temp[i][j];
+		}
+	}
+	return matrix;
+}
+
+//读取向量函数
+VectorXd readVariable_v(string OUTPUT_PATH) {
+	vector<vector<double>> matrix_temp;//列向量（这里其实还是原来的数组模式）
+	vector<double> row_data_temp;//行向量
+	string line_temp, temp;//
+	int line, col, row, i, j;//
+	smatch result;//
+	ifstream outputfile(OUTPUT_PATH);//以只读的方式打开文件不能改变文件的内容。
+	regex pattern("-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?", regex::icase);//
+	string::const_iterator iterStart;//
+	string::const_iterator iterEnd;//
+	if (!outputfile.is_open())
+	{
+		cout << "未成功打开结果文件:" << OUTPUT_PATH << endl;
+	}
+	line = 0;
+	while (getline(outputfile, line_temp)) {//getline读取一整行
+		if ((line_temp[0] == '!') || (line_temp.length() == 0)) {
+			continue;
+		}
+		else {
+			iterStart = line_temp.begin();
+			iterEnd = line_temp.end();
+			row_data_temp.clear();
+			while (regex_search(iterStart, iterEnd, result, pattern)) {
+				row_data_temp.push_back(atof(string(result[0]).c_str()));
+				iterStart = result[0].second;
+			}
+			matrix_temp.push_back(row_data_temp);
+			line++;
+		}
+	}
+	outputfile.close();   //关闭文件
+	row = matrix_temp.size();//（行数）
+	col = matrix_temp[0].size();//（列数）
+
+	Eigen::VectorXd vector(row);
+
+	for (i = 0; i < row; i++) {
+
+		vector(i) = matrix_temp[i][0];
+
+	}
+	return vector;
 }
