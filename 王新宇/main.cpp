@@ -10,8 +10,6 @@
 using namespace std;
 using namespace Eigen;
 
-#define OUTPUT_PATH_X "D:\\school\\Prime\\data\\dataX_120_2.txt"
-#define OUTPUT_PATH_Y "D:\\school\\Prime\\data\\dataY_120_2.txt"
 
 
 int main()
@@ -70,14 +68,17 @@ int main()
 
     cout << endl << "beta_vector是：" << endl << beta_vector<<endl;
 
+
+    cout << endl << "原Y是：" << endl << Y << endl;
+
+
     VectorXd computY;
     computY = normX * beta_vector;
     VectorXd invnormY;
     invnormY = invNormResponse(computY, a.normVar);
     cout << endl << "逆标准的Y预测是：" << endl << invnormY<<endl;
 
-    cout << endl << "原Y是：" << endl << Y<<endl;
-
+    
     VectorXd err_Y_vector;
     err_Y_vector = invnormY - Y;
     cout << endl << "预测误差是" << endl << err_Y_vector << endl;
@@ -86,7 +87,7 @@ int main()
     for (int i = 1; i <= N; i++)
         total_err_Y += err_Y_vector(i - 1) * err_Y_vector(i - 1);
     total_err_Y /= (double)N;
-    cout << endl << "误差总量计算为" << endl << total_err_Y << endl;
+    cout << endl << "误差总量二范数计算为" << endl << total_err_Y << endl;
 
     return 0;
 }

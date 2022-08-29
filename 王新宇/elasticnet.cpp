@@ -9,8 +9,8 @@
 using namespace std;
 using namespace Eigen;
 
-#define OUTPUT_PATH_X "D:\\school\\Prime\\data\\dataX_120_2.txt"
-#define OUTPUT_PATH_Y "D:\\school\\Prime\\data\\dataY_120_2.txt"
+#define OUTPUT_PATH_X "D:\\school\\Prime\\data\\dataX_120_1.txt"
+#define OUTPUT_PATH_Y "D:\\school\\Prime\\data\\dataY_120_1.txt"
 
 typedef struct {
     VectorXd meanPredictor;
@@ -148,17 +148,23 @@ RegressionVar normlization(MatrixXd X, VectorXd Y) {
     double temperr = 0;
 
     //算X平均值
-    for (int i = 1; i <= P; i++)
+    /*for (int i = 1; i <= P; i++)
     {
         tempmean = 0;
         for (int j = 1; j <= N; j++)
             tempmean += X(j - 1, i - 1);
         tempmean /= dN;
         mean_vector(i - 1) = tempmean;
+    }*/
+    for (int i = 1; i <= P; i++)
+    {
+        tempmean = 0;
+        tempmean += X.col(i - 1).mean();
+        mean_vector(i - 1) = tempmean;
     }
 
     //算X标准差
-    for (int i = 1; i <= P; i++)
+    /*for (int i = 1; i <= P; i++)
     {
         temperr = 0;
         for (int j = 1; j <= N; j++)
@@ -166,7 +172,16 @@ RegressionVar normlization(MatrixXd X, VectorXd Y) {
         temperr /= dN;
         temperr -= mean_vector(i - 1) * mean_vector(i - 1);
         err_vector(i - 1) = sqrt(temperr);
+    }*/
+    for (int i = 1; i <= P; i++)
+    {
+        temperr = 0;
+        temperr += (X.col(i - 1).norm())*(X.col(i-1).norm());
+        temperr /= dN;
+        temperr -= mean_vector(i - 1) * mean_vector(i - 1);
+        err_vector(i - 1) = sqrt(temperr);
     }
+
 
     //算Y的平均值
     double Y_tempmean, Y_temperr;
@@ -177,14 +192,19 @@ RegressionVar normlization(MatrixXd X, VectorXd Y) {
         Y_tempmean += Y(i - 1);
     }
     Y_tempmean /= dN;*/
-    Y_tempmean = Y.sum() / (double)Y.size();
+    Y_tempmean = Y.mean();
 
     //算Y的标准差
-    Y_temperr = 0;
+    /*Y_temperr = 0;
     for (int i = 1; i <= N; i++)
         Y_temperr += Y(i - 1) * Y(i - 1);
     Y_temperr /= dN;
+    Y_temperr -= Y_tempmean * Y_tempmean;*/
+    Y_temperr = Y.norm();
+    Y_temperr /= dN;
     Y_temperr -= Y_tempmean * Y_tempmean;
+    Y_temperr = sqrt(Y_temperr);
+
 
     RegressionVar regressionvar1;
     regressionvar1.predictor = X;
@@ -309,15 +329,16 @@ VectorXd coordinateDescentCovariance(MatrixXd X, VectorXd Y, double alpha, doubl
     VectorXd p_gradientvector = VectorXd::Zero(P);//p梯度向量
     MatrixXd dot_matrix = MatrixXd::Zero(P, P);//内积矩阵
 
-    //初始化p梯度向量
-    /*for (int i = 1; i <= P; i++)
-        p_gradientvector(i - 1) = normY.dot(normX.col(i - 1));*/
 
         //对梯度向量p和内积矩阵进行初始化
-    for (int j = 1; j <= P; j++)
+    /*for (int j = 1; j <= P; j++)
     {
         for (int i = 1; i <= N; i++)
             p_gradientvector(j - 1) += normX(i - 1, j - 1) * normY(i - 1);
+    }*/
+    for (int j = 1; j <= P; j++)
+    {
+        p_gradientvector(j - 1) += normY.dot(normX.col(j - 1));
     }
 
     for (int i = 1; i <= P; i++)
@@ -433,8 +454,9 @@ VectorXd coordinateDescentNaive(MatrixXd X, VectorXd Y, double alpha, double lam
             if (excessiveprice != betaj)
             {
                 imprecision += (excessiveprice - betaj) * (excessiveprice - betaj);
-                for (int j = 1; j <= N; j++)
-                    residual_vector(j - 1) -= normX(j - 1, i - 1) * (excessiveprice - betaj);
+                /*for (int j = 1; j <= N; j++)
+                    residual_vector(j - 1) -= normX(j - 1, i - 1) * (excessiveprice - betaj);*/
+                residual_vector -= normX.col(i - 1) * (excessiveprice - betaj);
                 beta_vector(i - 1) = excessiveprice;
             }
         }
@@ -501,10 +523,14 @@ VectorXd pathwiseLearning(MatrixXd X, VectorXd Y, double alpha) {
 
 
     //对梯度向量p和内积矩阵进行初始化
-    for (int j = 1; j <= P; j++)
+    /*for (int j = 1; j <= P; j++)
     {
         for (int i = 1; i <= N; i++)
             p_gradientvector(j - 1) += normX(i - 1, j - 1) * normY(i - 1);
+    }*/
+    for (int j = 1; j <= P; j++)
+    {
+        p_gradientvector(j - 1) += normY.dot(normX.col(j - 1));
     }
 
     for (int i = 1; i <= P; i++)

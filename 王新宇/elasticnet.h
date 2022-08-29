@@ -10,8 +10,7 @@
 using namespace std;
 using namespace Eigen;
 
-#define OUTPUT_PATH_X "D:\\school\\Prime\\data\\dataX_120_2.txt"
-#define OUTPUT_PATH_Y "D:\\school\\Prime\\data\\dataY_120_2.txt"
+
 
 typedef struct {
     VectorXd meanPredictor;
