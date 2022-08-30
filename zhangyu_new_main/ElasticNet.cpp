@@ -11,6 +11,8 @@ using namespace Eigen;
 
 #define OUTPUT_PATH "C:\\Users\\zhang\\Desktop\\Prime_intern\\data\\15_7.txt"
 
+#define PREDICTORPATH "C:\\Users\\zhang\\Desktop\\Prime_intern\\data\\15_7_m.txt"
+
 typedef struct {
     VectorXd meanPredictor;//X的均值
     VectorXd stdPredictor;//X的方差
@@ -22,24 +24,41 @@ typedef struct {
     NormVar normVar;//均值与方差
 } RegressionVar;
 
-MatrixXd readVariable() {
+typedef struct {
+    VectorXd betaVector;//回归后的系数
+    NormVar normVar;//均值与方差
+} RegressedBeta;
+
+MatrixXd readVariable(int Choice) {
     /*
     Description: Read space separated numeric variables from txt file.
-    Input: None
+    Input: int Choice: if choice = 1, read regressionvar; else if choice = 2, read predictor. 
     Output: Numerical matrix
     */
+    string Path;
+    if (Choice == 1) {
+        Path = OUTPUT_PATH;
+    }
+    else if (Choice == 2) {
+        Path = PREDICTORPATH;
+    }
+
+    else {
+        cout << "请输入正确的Choice" << endl;
+    }
+
     vector<vector<double>> matrix_temp;//列向量（这里其实还是原来的数组模式）
     vector<double> row_data_temp;//行向量
     string line_temp, temp;//
     int line, col, row, i, j;//
     smatch result;//
-    ifstream outputfile(OUTPUT_PATH);//以只读的方式打开文件不能改变文件的内容。
+    ifstream outputfile(Path);//以只读的方式打开文件不能改变文件的内容。
     regex pattern("-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?", regex::icase);//
     string::const_iterator iterStart;//
     string::const_iterator iterEnd;//
     if (!outputfile.is_open())
     {
-        cout << "未成功打开结果文件:" << OUTPUT_PATH << endl;
+        cout << "未成功打开结果文件:" << Path << endl;
     }
     line = 0;
     while (getline(outputfile, line_temp)) {//getline读取一整行
@@ -272,8 +291,8 @@ VectorXd coordinateDescentCovariance(MatrixXd X, VectorXd Y, VectorXd betaVector
     return betaVector;
 }
 
-//choice=1,朴素更新,choice=2,协方差更新（英文注释之后写）
-VectorXd pathwiseLearning_coordinateDescentNaive(RegressionVar regressionvar,double alpha=0.5, double error_limit = 1e-3,double epsilon =0.001,int K=100) {
+
+RegressedBeta pathwiseLearning_coordinateDescentNaive(RegressionVar regressionvar,double alpha=0.5, double error_limit = 1e-3,double epsilon =0.001,int K=100) {
     /*
      Description: Update the regression coefficient by coordinateDescentCovariance.
      Input:
@@ -330,12 +349,14 @@ VectorXd pathwiseLearning_coordinateDescentNaive(RegressionVar regressionvar,dou
                 error = error / p;
             }
     }
-
-    return betaVector;
+    RegressedBeta regressedBeta;
+    regressedBeta.betaVector = betaVector;
+    regressedBeta.normVar = regressionvar.normVar;
+    return regressedBeta;
 }
 
 
-VectorXd pathwiseLearning_coordinateDescentCovariance(RegressionVar regressionvar, double alpha = 0.5, double error_limit = 1e-3, double epsilon = 0.001, int K = 100) {
+RegressedBeta pathwiseLearning_coordinateDescentCovariance(RegressionVar regressionvar, double alpha = 0.5, double error_limit = 1e-3, double epsilon = 0.001, int K = 100) {
     /*
      Description: Update the regression coefficient by coordinateDescentCovariance.
      Input:
@@ -422,7 +443,10 @@ VectorXd pathwiseLearning_coordinateDescentCovariance(RegressionVar regressionva
 
     }
 
-    return betaVector;
+    RegressedBeta regressedBeta;
+    regressedBeta.betaVector = betaVector;
+    regressedBeta.normVar = regressionvar.normVar;
+    return regressedBeta;
 }
 
 //S函数第二个参数要做到非负
@@ -441,4 +465,14 @@ double S(double x, double y) {
     }
 
 
+}
+
+
+VectorXd Predict(MatrixXd X,  RegressedBeta regressedBeta) {
+    MatrixXd normPredictor(MatrixXd X, NormVar normvar);
+    VectorXd invNormResponse(VectorXd Y, NormVar normvar);
+    MatrixXd normedPredictor = normPredictor(X, regressedBeta.normVar);
+    VectorXd PreditctorVector = normedPredictor *(regressedBeta.betaVector);
+    VectorXd PreditctedVector = invNormResponse(PreditctorVector, regressedBeta.normVar);
+    return PreditctedVector; 
 }

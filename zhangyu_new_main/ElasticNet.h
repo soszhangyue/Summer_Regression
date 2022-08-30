@@ -10,6 +10,7 @@ using namespace std;
 using namespace Eigen;
 
 #define OUTPUT_PATH "C:\\Users\\zhang\\Desktop\\Prime_intern\\data\\15_7.txt"
+#define PREDICTORPATH "C:\\Users\\zhang\\Desktop\\Prime_intern\\data\\15_7_m.txt"
 
 typedef struct {
     VectorXd meanPredictor;//X的均值
@@ -22,8 +23,13 @@ typedef struct {
     NormVar normVar;//均值与方差
 } RegressionVar;
 
+typedef struct {
+    VectorXd betaVector;//回归后的系数
+    NormVar normVar;//均值与方差
+} RegressedBeta;
 
-MatrixXd readVariable();
+
+MatrixXd readVariable(int Choice);
 /*
     Description: Read space separated numeric variables from txt file.
     Input: None
@@ -93,8 +99,10 @@ Output:
 
 
 //朴素更新与协方差更新（英文注释之后写）
-VectorXd pathwiseLearning_coordinateDescentNaive(RegressionVar regressionvar, double alpha = 0.5, double error_limit = 1e-3, double epsilon = 0.001, int K = 100);
+RegressedBeta pathwiseLearning_coordinateDescentNaive(RegressionVar regressionvar, double alpha = 0.5, double error_limit = 1e-3, double epsilon = 0.001, int K = 100);
 
-VectorXd pathwiseLearning_coordinateDescentCovariance(RegressionVar regressionvar, double alpha = 0.5, double error_limit = 1e-3, double epsilon = 0.001, int K = 100);
+RegressedBeta pathwiseLearning_coordinateDescentCovariance(RegressionVar regressionvar, double alpha = 0.5, double error_limit = 1e-3, double epsilon = 0.001, int K = 100);
 //S函数第二个参数要做到非负
 double S(double x, double y);
+
+VectorXd Predict(MatrixXd X,  RegressedBeta regressedBeta);
